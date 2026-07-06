@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kalkulator Standard</title>
+  <style>
+    body {
+      background: #2c3e50;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .calculator {
+      background: #ecf0f1;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      width: 320px;
+      max-width: 100%;
+    }
+
+    .display {
+      width: 100%;
+      height: 60px;
+      font-size: 2rem;
+      text-align: right;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 10px;
+      background: #fff;
+      margin-bottom: 15px;
+      box-sizing: border-box;
+      pointer-events: none;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .buttons button {
+      font-size: 1.4rem;
+      padding: 15px 0;
+      border: none;
+      border-radius: 10px;
+      background: #bdc3c7;
+      color: #2c3e50;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .buttons button:active {
+      background: #95a5a6;
+      transform: scale(0.97);
+    }
+
+    .buttons .operator {
+      background: #f39c12;
+      color: white;
+    }
+
+    .buttons .equals {
+      background: #27ae60;
+      color: white;
+    }
+
+    .buttons .clear {
+      background: #e74c3c;
+      color: white;
+    }
+
+    .secret-browser {
+      margin-top: 25px;
+      background: #ecf0f1;
+      border-radius: 15px;
+      padding: 15px;
+      width: 320px;
+      max-width: 100%;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      display: none;
+    }
+
+    .secret-browser.active {
+      display: block;
+    }
+
+    .url-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .url-bar input {
+      flex: 1;
+      min-width: 150px;
+      padding: 8px 12px;
+      border: 1px solid #7f8c8d;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    .url-bar button {
+      background: #3498db;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 15px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .proxy-selector {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      border: 1px solid #7f8c8d;
+      font-size: 0.9rem;
+      background: white;
+    }
+
+    .secret-browser iframe {
+      width: 100%;
+      height: 400px;
+      border: 2px solid #bdc3c7;
+      border-radius: 10px;
+      background: white;
+    }
+
+    .note {
+      font-size: 0.75rem;
+      color: #7f8c8d;
+      margin-top: 8px;
+      text-align: center;
+    }
+
+    .open-new-tab {
+      margin-top: 8px;
+      text-align: center;
+    }
+
+    .open-new-tab a {
+      color: #2980b9;
+      font-size: 0.8rem;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <input type="text" class="display" id="display" value="0" readonly>
+
+    <div class="buttons">
+      <button class="clear" onclick="clearDisplay()">C</button>
+      <button class="operator" onclick="appendToDisplay('/')">/</button>
+      <button class="operator" onclick="appendToDisplay('*')">*</button>
+      <button class="operator" onclick="appendToDisplay('-')">-</button>
+
+      <button onclick="appendToDisplay('7')">7</button>
+      <button onclick="appendToDisplay('8')">8</button>
+      <button onclick="appendToDisplay('9')">9</button>
+      <button class="operator" onclick="appendToDisplay('+')">+</button>
+
+      <button onclick="appendToDisplay('4')">4</button>
+      <button onclick="appendToDisplay('5')">5</button>
+      <button onclick="appendToDisplay('6')">6</button>
+      <button class="equals" onclick="calculate()">=</button>
+
+      <button onclick="appendToDisplay('1')">1</button>
+      <button onclick="appendToDisplay('2')">2</button>
+      <button onclick="appendToDisplay('3')">3</button>
+      <button onclick="appendToDisplay('0')">0</button>
+
+      <button onclick="appendToDisplay('.')" style="grid-column: span 2;">.</button>
+      <button onclick="deleteLast()" style="grid-column: span 2;">⌫</button>
+    </div>
+  </div>
+
+  <div class="secret-browser" id="secretBrowser">
+    <div class="url-bar">
+      <input type="text" id="urlInput" placeholder="https://google.com" value="https://google.com">
+      <button onclick="navigateToUrl()">Go</button>
+    </div>
+    
+    <!-- Pilihan proxy -->
+    <select class="proxy-selector" id="proxySelect" onchange="navigateToUrl()">
+      <option value="ultraviolet">Ultraviolet (recommended)</option>
+      <option value="meteor">Meteor Proxy</option>
+      <option value="abyss">Abyss Proxy</option>
+      <option value="googleweb">Google Web Light</option>
+    </select>
+
+    <iframe id="proxyFrame" src="about:blank"></iframe>
+    
+    <div class="note">* Pilih proxy berbeda kalau satu nggak jalan</div>
+    
+    <div class="open-new-tab">
+      <a onclick="bukaDiTabBaru()">🔗 Buka di tab baru (lebih lancar)</a>
+    </div>
+  </div>
+
+  <script>
+    const display = document.getElementById('display');
+    const secretBrowser = document.getElementById('secretBrowser');
+    const urlInput = document.getElementById('urlInput');
+    const proxyFrame = document.getElementById('proxyFrame');
+    const proxySelect = document.getElementById('proxySelect');
+
+    let expression = '';
+    let lastKeySequence = [];
+
+    function appendToDisplay(char) {
+      if (expression === '0' && char !== '.') {
+        expression = char;
+      } else {
+        expression += char;
+      }
+      display.value = expression;
+      lastKeySequence.push(char);
+      if (lastKeySequence.length > 5) lastKeySequence.shift();
+    }
+
+    function clearDisplay() {
+      expression = '';
+      display.value = '0';
+      lastKeySequence = [];
+    }
+
+    function deleteLast() {
+      expression = expression.slice(0, -1);
+      display.value = expression || '0';
+      lastKeySequence.pop();
+    }
+
+    function calculate() {
+      if (expression === '') return;
+
+      if (expression.endsWith('1337')) {
+        secretBrowser.classList.add('active');
+        expression = '';
+        display.value = '0';
+        lastKeySequence = [];
+        return;
+      }
+
+      try {
+        const result = eval(expression);
+        display.value = result;
+        expression = result.toString();
+        lastKeySequence = [];
+      } catch {
+        display.value = 'Error';
+        expression = '';
+        lastKeySequence = [];
+      }
+    }
+
+    function getProxyUrl(targetUrl) {
+      const proxy = proxySelect.value;
+      const encodedUrl = encodeURIComponent(targetUrl);
+
+      switch(proxy) {
+        case 'ultraviolet':
+          // Ultraviolet public instance
+          return 'https://uv.xynet.workers.dev/service/' + encodedUrl;
+        
+        case 'meteor':
+          // Meteor public instance  
+          return 'https://meteorproxy.ducks.pw/service/' + encodedUrl;
+        
+        case 'abyss':
+          // Abyss proxy
+          return 'https://abyssproxy.vercel.app/proxy/' + encodedUrl;
+        
+        case 'googleweb':
+          // Google Web Light (gambar/text ringan, sering lolos)
+          return 'https://googleweblight.com/i?u=' + encodedUrl;
+        
+        default:
+          return 'https://uv.xynet.workers.dev/service/' + encodedUrl;
+      }
+    }
+
+    function navigateToUrl() {
+      let targetUrl = urlInput.value.trim();
+      if (!targetUrl) return;
+
+      if (!/^https?:\/\//i.test(targetUrl)) {
+        targetUrl = 'https://' + targetUrl;
+      }
+
+      const finalUrl = getProxyUrl(targetUrl);
+      proxyFrame.src = finalUrl;
+    }
+
+    // Buka langsung di tab baru (alternatif kalau iframe error)
+    function bukaDiTabBaru() {
+      let targetUrl = urlInput.value.trim();
+      if (!targetUrl) return;
+      if (!/^https?:\/\//i.test(targetUrl)) {
+        targetUrl = 'https://' + targetUrl;
+      }
+      const finalUrl = getProxyUrl(targetUrl);
+      window.open(finalUrl, '_blank');
+    }
+
+    window.tutupBrowserRahasia = function() {
+      secretBrowser.classList.remove('active');
+    };
+
+    urlInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        navigateToUrl();
+      }
+    });
+  </script>
+</body>
+</html>
